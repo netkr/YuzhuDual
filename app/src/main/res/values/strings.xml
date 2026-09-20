@@ -62,6 +62,8 @@
     <string name="clipboard_clear">清空剪贴板</string>
     <string name="clipboard_empty_ltip">无任何内容</string>
     <string name="about">关于</string>
+    <string name="about_app_name">语竹双屏输入法</string>
+    <string name="about_app_description">面向双屏 Android 掌机的中文输入法，支持主屏与副屏键盘切换、中文多种输入方式和离线语音输入。</string>
     <string name="feedback">吐槽与反馈</string>
     <string name="app_version">应用版本</string>
     <string name="sdk_version">SDK版本</string>
