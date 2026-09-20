@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        // 阿里云镜像优先（国内网络环境直连 google 仓库会 TLS 握手失败）
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.9.0'
+}
+
+include ':app'
