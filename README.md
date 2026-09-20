@@ -28,6 +28,12 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 app/build/outputs/apk/dualscreen/debug/
 ```
 
+## 下载 APK
+
+每次推送到 `main` 分支后，GitHub Actions 会自动构建 APK 并发布到 [Releases](https://github.com/netkr/YuzhuDual/releases)。
+
+可直接下载[最新 APK](https://github.com/netkr/YuzhuDual/releases/latest)。
+
 ## 设备支持
 
 当前主要针对 Retroid Pocket Duo Lite（Android 15，双屏）进行适配。其他双屏 Android 设备可能需要根据屏幕尺寸、density 和副屏行为进行调整。
