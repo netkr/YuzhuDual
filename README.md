@@ -1,49 +1,35 @@
 # 语竹双屏输入法 · YuzhuDual
 
-语竹双屏输入法是面向双屏 Android 掌机的中文输入法适配项目，英文项目名为 **YuzhuDual**。
+语竹双屏输入法是一款面向双屏 Android 掌机的中文输入法，支持主屏与副屏键盘切换，并提供多种中文输入方式和离线语音输入。
 
-项目基于 [YuyanIme](https://github.com/gurecn/YuyanIme) 的输入法与 Rime 数据能力，针对双屏设备进行了适配和改进。
+本仓库用于发布 APK。完整开发文件保存在本地项目中，线上仓库不提供源代码。
 
-## 主要特性
+## 下载
 
-- 支持中文全拼、简拼、双拼、笔画、手写和英文输入
-- 支持主屏与副屏之间的键盘显示切换
-- 针对 Retroid Pocket Duo Lite 的双屏布局适配
-- 支持深色主题，包括 GraphiteDark 和 GitHubDark
-- 支持离线语音输入：长按空格键即可说话输入
-- 支持键盘高度、按键样式、候选词和双拼提示等设置
+- [下载最新 APK](https://github.com/netkr/YuzhuDual/releases/latest)
+- [查看全部 Releases](https://github.com/netkr/YuzhuDual/releases)
 
-## 构建
+仓库根目录的 `YuzhuDual-latest.apk` 也是当前版本的直接下载文件。
 
-环境要求：Android Studio、Android SDK、JDK 以及可用的 Gradle 环境。
+## 主要功能
 
-```bash
-export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
-./gradlew assembleDualscreenDebug --no-daemon
-```
+- 中文全拼、简拼、双拼、笔画、手写和英文输入
+- 主屏与副屏键盘显示切换
+- 适配 Retroid Pocket Duo Lite 等双屏 Android 掌机
+- GraphiteDark、GitHubDark 等深色主题
+- 本地离线语音输入
+- 键盘高度、按键样式、候选词和双拼提示设置
 
-生成的 APK 位于：
+## 安装
 
-```text
-app/build/outputs/apk/dualscreen/debug/
-```
+1. 下载 APK。
+2. 在 Android 设置中允许安装来自此来源的应用。
+3. 安装后，在系统的“键盘/输入法”设置中启用“语竹双屏输入法”，并将其设为当前输入法。
 
-## 下载 APK
+## 隐私
 
-APK 由本地构建后手动发布到 [Releases](https://github.com/netkr/YuzhuDual/releases)。在线仓库仅保留项目介绍和 APK 下载文件。
+输入、词库和语音识别均在设备本地处理。本输入法不提供在线同步功能；剪贴板历史和自定义短语仅在用户启用相关功能后保存在本机。
 
-可直接下载[最新 APK](https://github.com/netkr/YuzhuDual/releases/latest)。
+## 许可证与致谢
 
-## 设备支持
-
-当前主要针对 Retroid Pocket Duo Lite（Android 15，双屏）进行适配。其他双屏 Android 设备可能需要根据屏幕尺寸、density 和副屏行为进行调整。
-
-## 项目参考与鸣谢
-
-- [YuyanIme](https://github.com/gurecn/YuyanIme)
-- [Rime](https://github.com/rime/librime)
-- [sherpa-ncnn](https://github.com/k2-fsa/sherpa-ncnn)
-
-## 许可证
-
-本项目遵循 [GPL-3.0](LICENSE) 许可证。
+本项目遵循 GPL-3.0 许可证，相关输入法和词库能力参考了 [YuyanIme](https://github.com/gurecn/YuyanIme)、[Rime](https://github.com/rime/librime) 和 [sherpa-ncnn](https://github.com/k2-fsa/sherpa-ncnn)。
