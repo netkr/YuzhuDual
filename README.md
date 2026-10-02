@@ -9,7 +9,14 @@
 - [下载最新 APK](https://github.com/netkr/YuzhuDual/releases/latest)
 - [查看全部 Releases](https://github.com/netkr/YuzhuDual/releases)
 
-仓库根目录的 `YuzhuDual-latest.apk` 也是当前版本的直接下载文件。
+## 更新日志
+
+**v20261002**
+- 修复：跟随系统明暗模式时，亮色/暗色主题切换不生效
+- 修复：收起按钮后副屏窗口不立即消失
+- 修复：设置页对话框确定/取消按钮颜色与背景过于接近
+- 优化：副屏 Presentation 复用，唤起速度提升
+- 优化：石墨灰统一设置界面与深色主题
 
 ## 主要功能
 
