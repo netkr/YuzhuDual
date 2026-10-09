@@ -1,5 +1,9 @@
 # 语竹双屏输入法 · YuzhuDual
 
+<p align="center">
+  <img src="docs/banner.png" alt="RP DUO 双屏输入法" width="360">
+</p>
+
 语竹双屏输入法是一款面向双屏 Android 掌机的中文输入法，支持主屏与副屏键盘切换，并提供多种中文输入方式。
 
 本仓库用于发布 APK。
