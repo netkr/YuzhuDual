@@ -13,9 +13,10 @@ class ManagedThemePreferenceUi(
     val defaultValue: Theme,
     @StringRes
     val summary: Int? = null,
-    enableUiOn: (() -> Boolean)? = null
+    enableUiOn: (() -> Boolean)? = null,
+    private val onThemeSelected: ((Theme) -> Unit)? = null
 ) : ManagedPreferenceUi<ThemeSelectPreference>(key, enableUiOn) {
-    override fun createUi(context: Context) = ThemeSelectPreference(context, defaultValue).apply {
+    override fun createUi(context: Context) = ThemeSelectPreference(context, defaultValue, onThemeSelected).apply {
         key = this@ManagedThemePreferenceUi.key
         isIconSpaceReserved = false
         isSingleLineTitle = false

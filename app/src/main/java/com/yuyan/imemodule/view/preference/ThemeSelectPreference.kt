@@ -9,8 +9,11 @@ import com.yuyan.imemodule.data.theme.ThemeManager
 import com.yuyan.imemodule.ui.fragment.theme.ResponsiveThemeListView
 import com.yuyan.imemodule.ui.fragment.theme.SimpleThemeListAdapter
 
-class ThemeSelectPreference(context: Context, private val defaultTheme: Theme) :
-    Preference(context) {
+class ThemeSelectPreference(
+    context: Context,
+    private val defaultTheme: Theme,
+    private val onThemeSelected: ((Theme) -> Unit)? = null
+) : Preference(context) {
 
     init {
         setDefaultValue(defaultTheme.name)
@@ -32,10 +35,11 @@ class ThemeSelectPreference(context: Context, private val defaultTheme: Theme) :
         AlertDialog.Builder(context)
             .setTitle(title)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                adapter.selectedTheme?.let {
-                    if (callChangeListener(it.name)) {
-                        persistString(it.name)
+                adapter.selectedTheme?.let { theme ->
+                    if (callChangeListener(theme.name)) {
+                        persistString(theme.name)
                         notifyChanged()
+                        onThemeSelected?.invoke(theme)
                     }
                 }
             }

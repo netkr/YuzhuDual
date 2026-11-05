@@ -8,4 +8,15 @@
     <color name="x_recycler_color_loading_color1">#55777777</color>
     <color name="x_recycler_color_loading_color2">#B1777777</color>
     <color name="x_recycler_color_loading_color3">#FF777777</color>
+
+    <!-- 石墨灰品牌色板（日间） -->
+    <color name="graphite_primary">#2f3437</color>
+    <color name="graphite_primary_dark">#23272a</color>
+    <color name="graphite_surface">#f6f7f8</color>
+    <color name="graphite_surface_variant">#eceeef</color>
+    <color name="graphite_outline">#d9dcdd</color>
+    <color name="graphite_divider">#e3e5e6</color>
+    <color name="graphite_text_primary">#1f2326</color>
+    <color name="graphite_text_secondary">#61686d</color>
+    <color name="graphite_accent">#4a5359</color>
 </resources>

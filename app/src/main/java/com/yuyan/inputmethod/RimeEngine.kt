@@ -1,5 +1,6 @@
 package com.yuyan.inputmethod
 
+import com.yuyan.imemodule.BuildConfig
 import android.util.Log
 import android.view.KeyEvent
 import com.yuyan.imemodule.application.CustomConstant
@@ -49,7 +50,9 @@ object RimeEngine {
         val keyCode = event.keyCode
         val keyChar = if(keyCode == KeyEvent.KEYCODE_APOSTROPHE) if(isFinish()) '/'.code else '\''.code
             else event.unicodeChar
-        Log.e("YuyanImeDual", "RimeEngine.onNormalKey: keyCode=$keyCode")
+        if (BuildConfig.DEBUG) {
+            Log.e("YuyanImeDual", "RimeEngine.onNormalKey: keyCode=$keyCode")
+        }
         if (keyRecordStack.pushKey(event))Rime.processKey(keyChar, event.action)
         updateCandidatesOrCommitText()
     }
@@ -175,7 +178,9 @@ object RimeEngine {
         val candidates = Rime.getRimeContext()?.candidates?.asList() ?: emptyList()
         customPhraseSize = 0
         val compositionText = Rime.compositionText
-        Log.e("YuyanImeDual", "RimeEngine.updateCandidates: schema=${Rime.getCurrentRimeSchema()} rimeCommit=${rimeCommit != null} candidates=${candidates.size}")
+        if (BuildConfig.DEBUG) {
+            Log.e("YuyanImeDual", "RimeEngine.updateCandidates: schema=${Rime.getCurrentRimeSchema()} rimeCommit=${rimeCommit != null} candidates=${candidates.size}")
+        }
         showCandidates = when {
             compositionText.isNotBlank() -> {
                 val phrase = CustomEngine.processPhrase(compositionText.replace("\'", ""))

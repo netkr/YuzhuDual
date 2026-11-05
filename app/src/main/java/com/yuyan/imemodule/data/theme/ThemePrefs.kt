@@ -21,7 +21,12 @@ class ThemePrefs(sharedPreferences: SharedPreferences) :
         enableUiOn: (() -> Boolean)? = null
     ): ManagedThemePreference {
         val pref = ManagedThemePreference(sharedPreferences, key, defaultValue)
-        val ui = ManagedThemePreferenceUi(title, key, defaultValue, summary, enableUiOn)
+        val ui = ManagedThemePreferenceUi(title, key, defaultValue, summary, enableUiOn) { theme ->
+            // 必须 commit 同步写入：fireChange() 内会立即 getValue() 回读，
+            // 用 apply() 异步写入会导致回读到旧值，activeTheme 判定相同而跳过
+            pref.sharedPreferences.edit().putString(key, theme.name).commit()
+            pref.fireChange()
+        }
         pref.register()
         ui.registerUi()
         return pref

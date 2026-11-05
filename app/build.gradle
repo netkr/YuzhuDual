@@ -78,6 +78,10 @@ android {
         }
     }
 
+    androidResources {
+        noCompress += ["bin"]
+    }
+
     buildTypes {
         release {
             // 混淆
