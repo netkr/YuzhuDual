@@ -1,16 +1,19 @@
 package com.yuyan.imemodule.ui.fragment
 
-import android.os.Bundle
-import android.util.TypedValue
-import android.view.View
 import android.content.res.ColorStateList
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
+import android.os.Bundle
+import android.view.Gravity
+import android.view.View
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.appcompat.content.res.AppCompatResources
 import com.yuyan.imemodule.R
 import com.yuyan.imemodule.prefs.AppPrefs
 
@@ -26,14 +29,14 @@ class ImeSettingsFragment : PreferenceFragmentCompat() {
         AppPrefs.getInstance().dualScreen.dualForceFullscreenPrimary.setValue(true)
 
         addCategory(R.string.input_methods) {
-            addDestinationPreference(R.string.setting_ime_input, R.drawable.ic_menu_language, R.id.action_settingsFragment_to_inputSettingsFragment)
-            addDestinationPreference(R.string.ime_settings_handwriting, R.drawable.ic_menu_handwriting, R.id.action_settingsFragment_to_handwritingSettingsFragment)
+            addDestinationPreference(R.string.setting_ime_input, R.string.setting_ime_input_summary, R.drawable.ic_menu_language, R.id.action_settingsFragment_to_inputSettingsFragment)
+            addDestinationPreference(R.string.ime_settings_handwriting, R.string.ime_settings_handwriting_summary, R.drawable.ic_menu_handwriting, R.id.action_settingsFragment_to_handwritingSettingsFragment)
         }
         addCategory(R.string.keyboard) {
-            addDestinationPreference(R.string.theme, R.drawable.ic_menu_theme, R.id.action_settingsFragment_to_themeSettingsFragment)
-            addDestinationPreference(R.string.keyboard_feedback, R.drawable.ic_menu_touch, R.id.action_settingsFragment_to_keyboardFeedbackFragment)
-            addDestinationPreference(R.string.setting_ime_keyboard, R.drawable.ic_menu_keyboard, R.id.action_settingsFragment_to_keyboardSettingFragment)
-            addDestinationPreference(R.string.clipboard, R.drawable.ic_menu_clipboard, R.id.action_settingsFragment_to_clipboardSettingsFragment)
+            addDestinationPreference(R.string.theme, R.string.theme_summary, R.drawable.ic_menu_theme, R.id.action_settingsFragment_to_themeSettingsFragment)
+            addDestinationPreference(R.string.keyboard_feedback, R.string.keyboard_feedback_summary, R.drawable.ic_menu_touch, R.id.action_settingsFragment_to_keyboardFeedbackFragment)
+            addDestinationPreference(R.string.setting_ime_keyboard, R.string.setting_ime_keyboard_summary, R.drawable.ic_menu_keyboard, R.id.action_settingsFragment_to_keyboardSettingFragment)
+            addDestinationPreference(R.string.clipboard, R.string.clipboard_summary, R.drawable.ic_menu_clipboard, R.id.action_settingsFragment_to_clipboardSettingsFragment)
             // 已隐藏“全面屏键盘优化”入口
             // addDestinationPreference(R.string.full_display_keyboard, R.drawable.ic_menu_keyboard_full, R.id.action_settingsFragment_to_fullDisplayKeyboardFragment)
         }
@@ -42,9 +45,10 @@ class ImeSettingsFragment : PreferenceFragmentCompat() {
         //     addDestinationPreference(R.string.setting_dual_screen, R.drawable.ic_menu_dualscreen, R.id.dualScreenSettingsFragment)
         // }
         addCategory(R.string.advanced) {
-            addDestinationPreference(R.string.setting_ime_other, R.drawable.ic_menu_more_horiz, R.id.action_settingsFragment_to_otherSettingsFragment)
+            addDestinationPreference(R.string.setting_ime_other, R.string.setting_ime_other_summary, R.drawable.ic_menu_more_horiz, R.id.action_settingsFragment_to_otherSettingsFragment)
             addPreference(R.string.about) {
                 setIcon(R.drawable.ic_menu_feedback)
+                setSummary(R.string.about_summary)
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_settingsFragment_to_aboutFragment)
                     true
@@ -62,16 +66,11 @@ class ImeSettingsFragment : PreferenceFragmentCompat() {
         category(cat)
     }
 
-    private fun PreferenceCategory.addDestinationPreference(title: Int, icon: Int, action: Int) {
-        val tint = getPrimaryTextColor()
-        val drawable = requireContext().getDrawable(icon)?.let { d ->
-            val wrap = DrawableCompat.wrap(d)
-            DrawableCompat.setTintList(wrap, tint)
-            wrap
-        }
+    private fun PreferenceCategory.addDestinationPreference(title: Int, summary: Int, icon: Int, action: Int) {
         val pref = Preference(requireContext()).apply {
-            this.icon = drawable
+            this.icon = createBadgedIcon(icon)
             setTitle(title)
+            setSummary(summary)
             setOnPreferenceClickListener {
                 findNavController().navigate(action)
                 true
@@ -84,30 +83,58 @@ class ImeSettingsFragment : PreferenceFragmentCompat() {
         val pref = Preference(requireContext()).apply {
             setTitle(title)
             preference()
-            val tint = getPrimaryTextColor()
             val ic = this.icon
             if (ic != null) {
-                val wrap = DrawableCompat.wrap(ic)
-                DrawableCompat.setTintList(wrap, tint)
-                this.icon = wrap
+                this.icon = createBadgedIcon(ic)
             }
         }
         addPreference(pref)
     }
 
-    private fun getPrimaryTextColor(): ColorStateList {
-        val tv = TypedValue()
-        val theme = requireContext().theme
-        return if (theme.resolveAttribute(android.R.attr.textColorPrimary, tv, true)) {
-            if (tv.type in TypedValue.TYPE_FIRST_COLOR_INT..TypedValue.TYPE_LAST_COLOR_INT) {
-                ColorStateList.valueOf(tv.data)
-            } else {
-                AppCompatResources.getColorStateList(requireContext(), tv.resourceId)
-            }
-        } else {
-            AppCompatResources.getColorStateList(requireContext(), android.R.color.black)
+    /**
+     * 将图标放入圆角浅色容器：石墨灰系（日夜自适应），保持克制简约
+     */
+    private fun createBadgedIcon(iconRes: Int): Drawable {
+        val ctx = requireContext()
+        val icon = DrawableCompat.wrap(ctx.getDrawable(iconRes)!!.mutate())
+        DrawableCompat.setTintList(icon, ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.graphite_text_primary)))
+        val bg = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = dp(10f).toFloat()
+            setColor(ContextCompat.getColor(ctx, R.color.graphite_surface_variant))
+        }
+        return object : LayerDrawable(arrayOf(bg, icon)) {
+            override fun getIntrinsicWidth(): Int = dp(38f)
+            override fun getIntrinsicHeight(): Int = dp(38f)
+        }.apply {
+            setLayerSize(0, dp(38f), dp(38f))
+            setLayerGravity(0, Gravity.CENTER)
+            setLayerSize(1, dp(22f), dp(22f))
+            setLayerGravity(1, Gravity.CENTER)
         }
     }
+
+    private fun createBadgedIcon(icon: Drawable): Drawable {
+        val ctx = requireContext()
+        val iconWrapped = DrawableCompat.wrap(icon.mutate())
+        DrawableCompat.setTintList(iconWrapped, ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.graphite_text_primary)))
+        val bg = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = dp(10f).toFloat()
+            setColor(ContextCompat.getColor(ctx, R.color.graphite_surface_variant))
+        }
+        return object : LayerDrawable(arrayOf(bg, iconWrapped)) {
+            override fun getIntrinsicWidth(): Int = dp(38f)
+            override fun getIntrinsicHeight(): Int = dp(38f)
+        }.apply {
+            setLayerSize(0, dp(38f), dp(38f))
+            setLayerGravity(0, Gravity.CENTER)
+            setLayerSize(1, dp(22f), dp(22f))
+            setLayerGravity(1, Gravity.CENTER)
+        }
+    }
+
+    private fun dp(value: Float): Int = (value * resources.displayMetrics.density).toInt()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

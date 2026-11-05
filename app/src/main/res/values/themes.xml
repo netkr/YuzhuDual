@@ -1,6 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/graphite_primary</item>
+        <item name="colorPrimaryDark">@color/graphite_primary_dark</item>
+        <item name="colorAccent">@color/graphite_accent</item>
+        <item name="android:colorBackground">@color/graphite_surface</item>
+        <item name="android:windowBackground">@color/graphite_surface</item>
+        <item name="android:textColorPrimary">@color/graphite_text_primary</item>
+        <item name="android:textColorSecondary">@color/graphite_text_secondary</item>
+        <item name="preferenceTheme">@style/AppPreferenceThemeOverlay</item>
+    </style>
+
+    <!-- 石墨灰：Preference 列表覆盖样式（分类标题小号品牌灰、屏幕留白、行高） -->
+    <style name="AppPreferenceThemeOverlay" parent="PreferenceThemeOverlay">
+        <item name="preferenceCategoryTitleTextAppearance">@style/AppPreferenceCategoryTitle</item>
+        <item name="preferenceStyle">@style/AppPreferenceStyle</item>
+    </style>
+
+    <style name="AppPreferenceCategoryTitle" parent="TextAppearance.AppCompat.Body2">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/graphite_text_secondary</item>
+        <item name="android:letterSpacing">0.08</item>
+    </style>
+
+    <style name="AppPreferenceStyle">
+        <item name="android:minHeight">56dp</item>
+    </style>
+
+    <style name="AppToolbarTitle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/graphite_text_primary</item>
     </style>
     <style name="Theme.CropActivityTheme" parent="Theme.AppCompat.DayNight">
         <item name="android:statusBarColor">?android:attr/colorPrimary</item>

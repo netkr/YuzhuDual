@@ -1,7 +1,10 @@
 package com.yuyan.imemodule.service
 
+import com.yuyan.imemodule.BuildConfig
 import android.app.Presentation
 import android.inputmethodservice.InputMethodService
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.view.KeyCharacterMap
@@ -44,7 +47,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
-import com.yuyan.imemodule.voice.VoiceRecognitionManager
 
 class ImeService : InputMethodService() {
     private var isWindowShown = false // 键盘窗口是否已显示
@@ -54,22 +56,22 @@ class ImeService : InputMethodService() {
     private var placeholderView: View? = null
     private var displayManager: DisplayManager? = null
     private val logTag = "YuyanImeDual"
+    // 副屏窗口延迟销毁：收起后延迟500ms再销毁，期间重新唤起则取消，实现快速复用
+    private val dismissHandler = Handler(Looper.getMainLooper())
+    private val dismissSecondaryRunnable = Runnable { dismissSecondary() }
+    private fun scheduleDismissSecondary(delayMs: Long = 5000) {
+        dismissHandler.removeCallbacks(dismissSecondaryRunnable)
+        dismissHandler.postDelayed(dismissSecondaryRunnable, delayMs)
+    }
+    private fun cancelDismissSecondary() {
+        dismissHandler.removeCallbacks(dismissSecondaryRunnable)
+    }
     // 调试覆盖层已隐藏
     private var debugOverlayPrimary: TextView? = null
     private var debugContextInfo: String = ""
 
     private var lastDisplayState: EnvironmentSingleton.DisplayState? = null
     
-    // 权限请求结果广播接收器
-    private val permissionResultReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == "com.yuyan.imemodule.PERMISSION_RESULT") {
-                val granted = intent.getBooleanExtra("granted", false)
-                handlePermissionResult(granted)
-            }
-        }
-    }
-
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) {
             // Log.d(logTag, "displayListener onDisplayAdded id=$displayId") // 调试标签已隐藏
@@ -95,7 +97,9 @@ class ImeService : InputMethodService() {
             }
         }
     }
-    private val onThemeChangeListener = OnThemeChangeListener { _: Theme? -> if (getActiveInputView() != null) getActiveInputView()!!.updateTheme() }
+    private val onThemeChangeListener = OnThemeChangeListener { _: Theme? ->
+        getActiveInputView()?.updateTheme()
+    }
     private val clipboardUpdateContent = getInstance().internal.clipboardUpdateContent
     private val clipboardUpdateContentListener = ManagedPreference.OnChangeListener<String> { _, value ->
         if(getInstance().clipboard.clipboardSuggestion.getValue()){
@@ -207,7 +211,6 @@ class ImeService : InputMethodService() {
     }
 
     private fun dismissSecondary() {
-        // Log.d(logTag, "dismissSecondary") // 调试标签已隐藏
         secondaryInputView = null
         try { secondaryPresentation?.dismiss() } catch (t: Throwable) { Log.e(logTag, "dismissSecondary error", t) }
         secondaryPresentation = null
@@ -246,8 +249,10 @@ class ImeService : InputMethodService() {
         // Log.d(logTag, "onStartInputView restarting=$restarting") // 调试标签已隐藏
         YuyanEmojiCompat.setEditorInfo(editorInfo)
 
-        // 先获取主屏的显示尺寸与方向，作为副屏使用判断依据
-        val currentWindowDisplay = try { window?.window?.decorView?.display } catch (_: Throwable) { null }
+        // 用主屏(DEFAULT_DISPLAY)的 metrics 推断显示状态，避免主 IME 窗口被系统分配到副屏时误判
+        val currentWindowDisplay = try {
+            displayManager?.getDisplay(Display.DEFAULT_DISPLAY)
+        } catch (_: Throwable) { null }
         val currentWindowMetrics = try {
             currentWindowDisplay?.let { createDisplayContext(it).resources.displayMetrics }
         } catch (_: Throwable) { null } ?: baseContext.resources.displayMetrics
@@ -295,6 +300,7 @@ class ImeService : InputMethodService() {
             false
         }
         // Log.d(logTag, "shownOnSecondary=$shownOnSecondary") // 调试标签已隐藏
+        if (shownOnSecondary) cancelDismissSecondary()
 
         // 设置输入视图（正常 IME 窗口）
         if (!shownOnSecondary) {
@@ -368,25 +374,25 @@ class ImeService : InputMethodService() {
         super.onWindowHidden()
         isWindowShown = false
         getActiveInputView()?.onWindowHidden()
-        dismissSecondary()
+        scheduleDismissSecondary()
     }
 
     override fun onFinishInput() {
         super.onFinishInput()
         getActiveInputView()?.resetToIdleState()
-        dismissSecondary()
+        scheduleDismissSecondary()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
         getActiveInputView()?.resetToIdleState()
-        dismissSecondary()
+        scheduleDismissSecondary()
     }
 
     override fun onUnbindInput() {
         super.onUnbindInput()
         getActiveInputView()?.resetToIdleState()
-        dismissSecondary()
+        scheduleDismissSecondary()
     }
 
     fun sendDeleteKeyEvent()
@@ -452,12 +458,16 @@ class ImeService : InputMethodService() {
 
     fun commitText(text: String) {
         val ic: InputConnection? = currentInputConnection
-        Log.e("YuyanImeDual", "ImeService.commitText: text='$text' icNull=${ic == null}")
+        if (BuildConfig.DEBUG) {
+            Log.e("YuyanImeDual", "ImeService.commitText: text='$text' icNull=${ic == null}")
+        }
         ic?.commitText(text, 1)
     }
 
     fun setComposingText(text: CharSequence) {
-        Log.e("YuyanImeDual", "ImeService.setComposingText: text='$text' icNull=${currentInputConnection == null}")
+        if (BuildConfig.DEBUG) {
+            Log.e("YuyanImeDual", "ImeService.setComposingText: text='$text' icNull=${currentInputConnection == null}")
+        }
         currentInputConnection?.setComposingText(text, 1)
     }
 
@@ -466,7 +476,7 @@ class ImeService : InputMethodService() {
     }
 
     fun forceHideKeyboard() {
-        // 收起系统输入法并清理副屏
+        // 用户明确点收起：立即隐藏主屏并销毁副屏窗口
         try { requestHideSelf(0) } catch (_: Throwable) {}
         isWindowShown = false
         dismissSecondary()
@@ -526,91 +536,16 @@ class ImeService : InputMethodService() {
         }
     }
     
-    /**
-     * 初始化语音识别
-     */
-    private fun initializeVoiceRecognition() {
-        try {
-            // 在后台线程初始化语音识别
-            GlobalScope.launch(Dispatchers.IO) {
-                VoiceRecognitionManager.initialize()
-            }
-        } catch (e: Exception) {
-            Log.e("ImeService", "Failed to initialize voice recognition", e)
-        }
-    }
+
     
-    /**
-     * 权限请求回调接口
-     */
-    interface PermissionCallback {
-        fun onPermissionGranted()
-        fun onPermissionDenied()
-        fun onPermissionPermanentlyDenied()
-    }
+
     
-    private var currentPermissionCallback: PermissionCallback? = null
     
-    /**
-     * 请求语音识别权限
-     * @param callback 权限请求结果回调
-     */
-    fun requestVoiceRecognitionPermissions(callback: PermissionCallback? = null) {
-        currentPermissionCallback = callback
-        
-        try {
-            // 标记权限已被请求过（用于区分首次请求和永久拒绝）
-            com.yuyan.imemodule.permission.PermissionManager.markPermissionAsRequested(this)
-            
-            // 获取缺失的权限
-            val missingPermissions = com.yuyan.imemodule.permission.PermissionManager.getMissingPermissions()
-            
-            if (missingPermissions.isNotEmpty()) {
-                // 由于 InputMethodService 不是 Activity，我们需要通过特殊方式处理权限请求
-                // 这里使用启动一个透明 Activity 的方式来处理权限请求
-                try {
-                    val intent = android.content.Intent().apply {
-                        setClass(this@ImeService, Class.forName("com.yuyan.imemodule.ui.activity.PermissionRequestActivity"))
-                        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                        putExtra("permissions", missingPermissions)
-                    }
-                    startActivity(intent)
-                } catch (e: ClassNotFoundException) {
-                    Log.e("ImeService", "PermissionRequestActivity not found", e)
-                    callback?.onPermissionDenied()
-                }
-            } else {
-                // 权限已授予
-                callback?.onPermissionGranted()
-            }
-        } catch (e: Exception) {
-            Log.e("ImeService", "Error requesting permissions", e)
-            callback?.onPermissionDenied()
-        }
-    }
+
     
-    /**
-     * 处理权限请求结果（由 PermissionRequestActivity 调用）
-     */
-    fun handlePermissionResult(granted: Boolean) {
-        val callback = currentPermissionCallback
-        currentPermissionCallback = null
-        
-        if (granted) {
-            callback?.onPermissionGranted()
-        } else {
-            // 判断是否是永久拒绝
-            val status = com.yuyan.imemodule.permission.PermissionManager.getVoiceRecognitionPermissionStatus(this)
-            if (status == com.yuyan.imemodule.permission.PermissionManager.PermissionStatus.PERMANENTLY_DENIED) {
-                callback?.onPermissionPermanentlyDenied()
-            } else {
-                callback?.onPermissionDenied()
-            }
-        }
-    }
 
     /**
-     * 获取当前服务实例（供语音识别使用）
+     * 获取当前服务实例
      */
     companion object {
         @Volatile
@@ -629,38 +564,17 @@ class ImeService : InputMethodService() {
         ThemeManager.addOnChangedListener(onThemeChangeListener)
         clipboardUpdateContent.registerOnChangeListener(clipboardUpdateContentListener)
         
-        // 注册权限请求结果广播接收器（Android 13+ 必须显式声明导出标志；该广播仅由本应用内 Activity 发送，故用 NOT_EXPORTED）
-        registerReceiver(
-            permissionResultReceiver,
-            IntentFilter("com.yuyan.imemodule.PERMISSION_RESULT"),
-            Context.RECEIVER_NOT_EXPORTED
-        )
-        
-        // 初始化语音识别
-        initializeVoiceRecognition()
     }
     
     override fun onDestroy() {
         super.onDestroy()
+        dismissHandler.removeCallbacks(dismissSecondaryRunnable)
         currentInstance = null
-        
-        // 销毁语音识别
-        try {
-            VoiceRecognitionManager.destroy()
-        } catch (e: Exception) {
-            Log.e("ImeService", "Failed to destroy voice recognition", e)
-        }
         
         // 取消显示监听器
         displayManager?.unregisterDisplayListener(displayListener)
         ThemeManager.removeOnChangedListener(onThemeChangeListener)
         clipboardUpdateContent.unregisterOnChangeListener(clipboardUpdateContentListener)
         
-        // 注销权限请求结果广播接收器
-        try {
-            unregisterReceiver(permissionResultReceiver)
-        } catch (e: Exception) {
-            Log.e("ImeService", "Failed to unregister permission receiver", e)
-        }
     }
 }

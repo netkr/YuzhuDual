@@ -10,8 +10,15 @@
     <string name="setting_ime_prefixs">侧边栏</string>
     <string name="theme_select">主题选择</string>
     <string name="setting_ime_keyboard_show">键盘效果</string>
+    <string name="setting_ime_input_summary">拼音、双拼、联想与按键设置</string>
+    <string name="ime_settings_handwriting_summary">手写识别与笔迹相关设置</string>
+    <string name="theme_summary">键盘皮肤与配色方案</string>
+    <string name="keyboard_feedback_summary">按键反馈、音效与气泡</string>
+    <string name="setting_ime_keyboard_summary">键盘布局、高度与符号</string>
+    <string name="clipboard_summary">剪贴板历史与快捷粘贴</string>
+    <string name="setting_ime_other_summary">辅助功能、手势与其他</string>
+    <string name="about_summary">应用信息、版本与开源许可</string>
     <string name="setting_ime_keyboard_height">键盘调节</string>
-    <string name="ime_settings_voice">语音识别</string>
     <string name="ime_settings_handwriting">手写设置</string>
     <string name="keypopup_input_settings">按键气泡</string>
     <string name="long_press_timeout">按键长按灵敏度</string>
@@ -63,7 +70,7 @@
     <string name="clipboard_empty_ltip">无任何内容</string>
     <string name="about">关于</string>
     <string name="about_app_name">语竹双屏输入法</string>
-    <string name="about_app_description">面向双屏 Android 掌机的中文输入法，支持主屏与副屏键盘切换、中文多种输入方式和离线语音输入。</string>
+    <string name="about_app_description">面向双屏 Android 掌机的中文输入法，支持主屏与副屏键盘切换、中文多种输入方式。</string>
     <string name="feedback">吐槽与反馈</string>
     <string name="app_version">应用版本</string>
     <string name="sdk_version">SDK版本</string>
@@ -229,20 +236,4 @@
     <string name="setting_dual_screen">双屏</string>
     <string name="dual_force_fullscreen_primary">主屏激活时强制全屏</string>
 
-    <!-- 语音识别设置 -->
-    <string name="voice_input_enabled">启用语音输入</string>
-    <string name="voice_input_enabled_tips">长按空格键启动语音识别</string>
-    <string name="voice_input_auto_commit">自动提交识别结果</string>
-    <string name="voice_input_auto_commit_tips">识别完成后自动输入文字</string>
-    <string name="voice_input_show_partial">显示实时识别结果</string>
-    <string name="voice_input_show_partial_tips">在键盘上方显示识别过程中的文字</string>
-    <string name="voice_input_language">识别语言</string>
-    <string name="voice_language_bilingual">中英双语</string>
-    <string name="voice_language_chinese_only">仅中文</string>
-    <string name="voice_language_english_only">仅英文</string>
-    <string name="voice_recognition_starting">正在启动语音识别…</string>
-    <string name="voice_recognition_listening">正在听取语音…</string>
-    <string name="voice_recognition_error">语音识别失败</string>
-    <string name="voice_permission_required">需要录音权限</string>
-    <string name="voice_permission_rationale">语音识别需要录音权限，请在设置中授权</string>
 </resources>

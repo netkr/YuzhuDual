@@ -24,4 +24,9 @@ open class InputBaseContainer(context: Context?, inputView: InputView) : BaseCon
         mMajorView!!.updateStates()
     }
 
+    /** 应用当前主题到键盘按键（用于运行时切换皮肤） */
+    fun applyTheme() {
+        mMajorView?.setTheme(com.yuyan.imemodule.data.theme.ThemeManager.activeTheme)
+    }
+
 }

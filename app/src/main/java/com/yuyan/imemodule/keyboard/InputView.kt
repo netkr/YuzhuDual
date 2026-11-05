@@ -1,5 +1,6 @@
 package com.yuyan.imemodule.keyboard
 
+import com.yuyan.imemodule.BuildConfig
 import android.util.Log
 import android.annotation.SuppressLint
 import android.content.Context
@@ -36,6 +37,7 @@ import com.yuyan.imemodule.database.entry.Phrase
 import com.yuyan.imemodule.entity.keyboard.SoftKey
 import com.yuyan.imemodule.keyboard.container.CandidatesContainer
 import com.yuyan.imemodule.keyboard.container.ClipBoardContainer
+import com.yuyan.imemodule.keyboard.container.InputBaseContainer
 import com.yuyan.imemodule.keyboard.container.SymbolContainer
 import com.yuyan.imemodule.keyboard.container.T9TextContainer
 import com.yuyan.imemodule.manager.InputModeSwitcherManager
@@ -208,6 +210,8 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
         // 单手模式按钮着色已移除
         // mFullDisplayKeyboardBar?.updateTheme(keyTextColor) // 全面屏工具栏已移除
         mAddPhrasesLayout.updateTheme(ThemeManager.activeTheme)
+        // 同步更新键盘按键颜色（否则切换皮肤后按键仍为旧色）
+        (KeyboardManager.instance.currentContainer as? InputBaseContainer)?.applyTheme()
     }
 
     private fun onClick(view: View) {
@@ -470,7 +474,9 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
         val keyCode = event.keyCode
         val keyChar = event.unicodeChar
         val lable = keyChar.toChar().toString()
-        Log.e("YuyanImeDual", "InputView.processInput: keyCode=$keyCode keyChar=$keyChar")
+        if (BuildConfig.DEBUG) {
+            Log.e("YuyanImeDual", "InputView.processInput: keyCode=$keyCode keyChar=$keyChar")
+        }
         if (keyCode == KeyEvent.KEYCODE_DEL) {
             if (DecodingInfo.isFinish || DecodingInfo.isAssociate) {
                 sendKeyEvent(keyCode)
@@ -552,7 +558,9 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
      */
     private fun updateCandidate() {
         DecodingInfo.updateDecodingCandidate()
-        Log.e("YuyanImeDual", "InputView.updateCandidate: isFinish=${DecodingInfo.isFinish} candSize=${Kernel.candidates.size}")
+        if (BuildConfig.DEBUG) {
+            Log.e("YuyanImeDual", "InputView.updateCandidate: isFinish=${DecodingInfo.isFinish} candSize=${Kernel.candidates.size}")
+        }
         if (!DecodingInfo.isFinish) {
             updateCandidateBar()
             (KeyboardManager.instance.currentContainer as? T9TextContainer)?.updateSymbolListView()
