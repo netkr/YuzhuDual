@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 石墨灰品牌色板（夜间，呼应 GraphiteDark 键盘皮肤） -->
+    <color name="graphite_primary">#23272a</color>
+    <color name="graphite_primary_dark">#16181c</color>
+    <color name="graphite_surface">#16181c</color>
+    <color name="graphite_surface_variant">#1e2126</color>
+    <color name="graphite_outline">#2a2e34</color>
+    <color name="graphite_divider">#23272a</color>
+    <color name="graphite_text_primary">#e4e6e9</color>
+    <color name="graphite_text_secondary">#9aa1a6</color>
+    <color name="graphite_accent">#8a929a</color>
+</resources>

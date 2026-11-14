@@ -4,14 +4,16 @@
   <img src="docs/banner.png" alt="RP DUO 双屏输入法" width="360">
 </p>
 
-语竹双屏输入法是一款面向双屏 Android 掌机的中文输入法，支持主屏与副屏键盘切换，并提供多种中文输入方式。
+语竹双屏输入法是一款面向双屏 Android 掌机的中文输入法，基于 YuyanIme 与 Rime 构建，支持主屏与副屏键盘切换，并提供多种中文输入方式。
 
-本仓库用于发布 APK。
+本仓库同时包含**完整源码**与**编译好的 APK**。
 
 ## 下载
 
 - [下载最新 APK](https://github.com/netkr/YuzhuDual/releases/latest)
 - [查看全部 Releases](https://github.com/netkr/YuzhuDual/releases)
+
+> APK 体积约 129 MB，超过 GitHub 单文件 100 MB 上限，因此仅通过 Release 附件分发，不放入仓库文件树。
 
 ## 更新日志
 
@@ -30,6 +32,57 @@
 - GraphiteDark、GitHubDark 等深色主题
 - 键盘高度、按键样式、候选词和双拼提示设置
 - 石墨灰统一设置界面
+
+## 源码构建
+
+### 环境要求
+
+- Android SDK（compileSdk 35）
+- JDK 17
+- 默认构建变体为 `dualscreen`，包名 `com.yuyan.pinyin.online`
+
+### 构建 debug 版（无需签名配置）
+
+```bash
+export JAVA_HOME="/path/to/jdk17"
+./gradlew assembleDualscreenDebug --no-daemon
+```
+
+APK 输出：`app/build/outputs/apk/dualscreen/debug/`
+
+### 构建 release 版
+
+release 构建需要自备签名文件。将 keystore 放入 `keystore/`，并创建 `keystore/keystore.properties`：
+
+```properties
+storeFile=your-release.jks
+storePassword=your-password
+keyAlias=your-alias
+keyPassword=your-password
+```
+
+```bash
+./gradlew assembleDualscreenRelease --no-daemon
+```
+
+签名文件与密码不会包含在本仓库中。
+
+### 词库说明
+
+Rime 词库位于 `app/src/main/assets/rime/build/`，其中 `*.bin` 为预编译词库文件。修改 `assets/rime` 内容后，需要递增 `CustomConstant.kt` 中的词库版本号，或清除应用数据后重新部署。
+
+## 目录结构
+
+```
+app/src/main/java/com/yuyan/imemodule/
+├── service/          # ImeService、副屏 Presentation
+├── keyboard/         # 键盘容器与视图
+├── data/theme/       # 主题定义与偏好
+└── view/preference/  # 设置页组件
+app/src/main/assets/rime/build/   # Rime 词库与方案
+app/src/main/jniLibs/             # native 库
+docs/banner.png                   # 项目宣传图
+```
 
 ## 安装
 
